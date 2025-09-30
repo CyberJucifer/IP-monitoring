@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Monitoring Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .ip-list {
+            display: grid;
+            gap: 15px;
+        }
+        .ip-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+        .ip-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .ip-address {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .ip-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .status-enabled {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-disabled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .ip-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        .btn:hover {
+            opacity: 0.8;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌐 IP Monitoring Dashboard</h1>
+            <p>Monitor IP address availability and performance statistics</p>
+        </div>
+
+        <div class="card">
+            <h2>Add New IP Address</h2>
+            <form id="add-ip-form">
+                <div class="form-group">
+                    <label for="ip-address">IP Address (IPv4 or IPv6):</label>
+                    <input type="text" id="ip-address" placeholder="8.8.8.8 or 2001:4860:4860::8888" required>
+                </div>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="enabled" checked>
+                        <label for="enabled">Enable monitoring immediately</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Add IP Address</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>IP Addresses</h2>
+            <div id="ip-list" class="ip-list">
+                <div class="loading">Loading IP addresses...</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>System Statistics</h2>
+            <div id="system-stats" class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-ips">-</div>
+                    <div class="stat-label">Total IPs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="enabled-ips">-</div>
+                    <div class="stat-label">Enabled</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="disabled-ips">-</div>
+                    <div class="stat-label">Disabled</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load IP addresses on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadIPs();
+        });
+
+        // Add IP form handler
+        document.getElementById('add-ip-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const ip = document.getElementById('ip-address').value;
+            const enabled = document.getElementById('enabled').checked;
+            
+            fetch('/ips', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ip: ip, enabled: enabled })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    document.getElementById('ip-address').value = '';
+                    loadIPs();
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+            });
+        });
+
+        function loadIPs() {
+            fetch('/ips')
+            .then(response => response.json())
+            .then(ips => {
+                displayIPs(ips);
+                updateStats(ips);
+            })
+            .catch(error => {
+                document.getElementById('ip-list').innerHTML = '<div class="loading">Error loading IP addresses</div>';
+            });
+        }
+
+        function displayIPs(ips) {
+            const container = document.getElementById('ip-list');
+            
+            if (ips.length === 0) {
+                container.innerHTML = '<div class="loading">No IP addresses configured</div>';
+                return;
+            }
+
+            container.innerHTML = ips.map(ip => `
+                <div class="ip-item">
+                    <div class="ip-info">
+                        <div class="ip-address">${ip.ip}</div>
+                        <div class="ip-status ${ip.enabled ? 'status-enabled' : 'status-disabled'}">
+                            ${ip.enabled ? 'Enabled' : 'Disabled'}
+                        </div>
+                    </div>
+                    <div class="ip-actions">
+                        <button class="btn ${ip.enabled ? 'btn-warning' : 'btn-success'}" 
+                                onclick="toggleIP(${ip.id}, ${ip.enabled})">
+                            ${ip.enabled ? 'Disable' : 'Enable'}
+                        </button>
+                        <button class="btn btn-primary" onclick="viewStats(${ip.id}, '${ip.ip}')">
+                            Stats
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteIP(${ip.id}, '${ip.ip}')">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats(ips) {
+            const total = ips.length;
+            const enabled = ips.filter(ip => ip.enabled).length;
+            const disabled = total - enabled;
+
+            document.getElementById('total-ips').textContent = total;
+            document.getElementById('enabled-ips').textContent = enabled;
+            document.getElementById('disabled-ips').textContent = disabled;
+        }
+
+        function toggleIP(id, currentlyEnabled) {
+            const action = currentlyEnabled ? 'disable' : 'enable';
+            
+            fetch(`/ips/${id}/${action}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    loadIPs();
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+            });
+        }
+
+        function deleteIP(id, ip) {
+            if (confirm(`Are you sure you want to delete ${ip}?`)) {
+                fetch(`/ips/${id}`, { method: 'DELETE' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                    } else {
+                        loadIPs();
+                    }
+                })
+                .catch(error => {
+                    alert('Error: ' + error.message);
+                });
+            }
+        }
+
+        function viewStats(id, ip) {
+            const timeFrom = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+            const timeTo = new Date().toISOString();
+            
+            fetch(`/ips/${id}/stats?time_from=${timeFrom}&time_to=${timeTo}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    showStatsModal(ip, data);
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+            });
+        }
+
+        function showStatsModal(ip, stats) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 8px; max-width: 500px; width: 90%;">
+                    <h2>Statistics for ${ip}</h2>
+                    <div style="margin: 20px 0;">
+                        <p><strong>Total Pings:</strong> ${stats.total_pings}</p>
+                        <p><strong>Successful Pings:</strong> ${stats.successful_pings}</p>
+                        <p><strong>Packet Loss:</strong> ${stats.packet_loss_percentage}%</p>
+                        ${stats.rtt_stats ? `
+                            <h3>RTT Statistics (ms)</h3>
+                            <p><strong>Min:</strong> ${stats.rtt_stats.min || 'N/A'}</p>
+                            <p><strong>Max:</strong> ${stats.rtt_stats.max || 'N/A'}</p>
+                            <p><strong>Mean:</strong> ${stats.rtt_stats.mean || 'N/A'}</p>
+                            <p><strong>Median:</strong> ${stats.rtt_stats.median || 'N/A'}</p>
+                            <p><strong>Std Dev:</strong> ${stats.rtt_stats.std_dev || 'N/A'}</p>
+                        ` : ''}
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            class="btn btn-primary">Close</button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+    </script>
+</body>
+</html>
+

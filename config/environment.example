@@ -1,0 +1,24 @@
+# Environment Configuration Example
+# Copy this file to .env and update the values for your local development
+
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=ip_monitoring
+DB_USER=postgres
+DB_PASSWORD=your_secure_password_here
+
+# Alternative: Full Database URL (overrides individual DB_* variables)
+# DATABASE_URL=postgres://username:password@host:port/database
+
+# Application Configuration
+RACK_ENV=development
+PORT=4567
+
+# Monitoring Configuration
+PING_INTERVAL=60
+PING_TIMEOUT=1
+
+# Security (for production)
+# SECRET_KEY_BASE=your_secret_key_base_here
+# JWT_SECRET=your_jwt_secret_here

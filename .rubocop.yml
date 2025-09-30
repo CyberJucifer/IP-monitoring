@@ -1,0 +1,146 @@
+require:
+  - rubocop-rspec
+
+plugins:
+  - rubocop-performance
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.2
+  Exclude:
+    - 'db/migrate.rb'
+    - 'config/database.rb'
+    - 'config/environment.rb'
+    - 'config/initializers.rb'
+    - 'log/**/*'
+    - 'tmp/**/*'
+    - 'vendor/**/*'
+    - 'spec/**/*'
+    - 'test_*.rb'
+    - 'demo.rb'
+    - 'scripts/**/*'
+    - 'lib/validators/params_validator_old.rb'
+    - 'lib/validators/params_validator_refactored.rb'
+
+# Style
+Style/Documentation:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/ClassAndModuleChildren:
+  EnforcedStyle: compact
+
+Style/EmptyMethod:
+  EnforcedStyle: expanded
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+Style/GuardClause:
+  Enabled: false
+
+# Layout
+Layout/LineLength:
+  Max: 100
+  Exclude:
+    - 'config/**/*'
+    - 'db/**/*'
+
+Metrics/MethodLength:
+  Max: 20
+  Exclude:
+    - 'lib/validators/**/*'
+    - 'lib/services/stats_service.rb'
+
+Metrics/AbcSize:
+  Max: 20
+  Exclude:
+    - 'lib/validators/**/*'
+    - 'lib/services/stats_service.rb'
+
+Metrics/CyclomaticComplexity:
+  Max: 7
+  Exclude:
+    - 'lib/validators/**/*'
+    - 'lib/services/stats_service.rb'
+
+Metrics/PerceivedComplexity:
+  Max: 8
+  Exclude:
+    - 'lib/validators/**/*'
+    - 'lib/services/stats_service.rb'
+
+Metrics/ClassLength:
+  Max: 150
+  Exclude:
+    - 'lib/validators/**/*'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'lib/validators/**/*'
+
+# Layout
+Layout/EmptyLinesAroundBlockBody:
+  Enabled: false
+
+Layout/EmptyLinesAroundClassBody:
+  Enabled: false
+
+Layout/EmptyLinesAroundModuleBody:
+  Enabled: false
+
+Layout/EmptyLinesAroundMethodBody:
+  Enabled: false
+
+# Performance
+Performance/UnfreezeString:
+  Enabled: true
+
+Performance/RedundantStringChars:
+  Enabled: true
+
+# RSpec
+RSpec/ExampleLength:
+  Max: 10
+
+RSpec/MultipleExpectations:
+  Max: 5
+
+RSpec/NestedGroups:
+  Max: 4
+
+# Custom rules
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/WordArray:
+  MinSize: 3
+
+Style/SymbolArray:
+  MinSize: 3
+
+# Disable problematic cops
+Capybara/RSpec/PredicateMatcher:
+  Enabled: false
+
+FactoryBot/ExcessiveCreateList:
+  Enabled: false
+
+FactoryBot/AssociationStyle:
+  Enabled: false
+
+# Allow global variables in specific files
+Style/GlobalVars:
+  Exclude:
+    - 'app.rb'
+    - 'config/logger.rb'
+    - 'lib/controllers/health_controller.rb'
