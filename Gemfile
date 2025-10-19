@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '3.2.0'
+ruby '3.2.3'
 
 gem 'dotenv', '~> 2.8'
 gem 'ipaddr', '~> 1.2'

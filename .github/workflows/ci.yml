@@ -32,7 +32,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 3.2.0
+        ruby-version: 3.2.3
         bundler-cache: true
 
     - name: Install system dependencies
@@ -43,10 +43,6 @@ jobs:
     - name: Run RuboCop
       run: |
         bundle exec rubocop --parallel
-
-    - name: Run RuboCop security checks
-      run: |
-        bundle exec rubocop --only Security
 
     - name: Run tests
       env:
