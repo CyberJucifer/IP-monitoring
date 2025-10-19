@@ -69,5 +69,3 @@ end
 def log_fatal(message)
   $logger.fatal(message)
 end
-
-

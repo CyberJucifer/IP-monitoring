@@ -34,4 +34,3 @@ module ModelInterface
     raise NotImplementedError, "#{self.class} must implement values"
   end
 end
-

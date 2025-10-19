@@ -18,4 +18,3 @@ module ValidatorInterface
     raise NotImplementedError, "#{self.class} must implement errors"
   end
 end
-

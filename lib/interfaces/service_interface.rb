@@ -14,4 +14,3 @@ module ServiceInterface
     raise NotImplementedError, "#{self.class} must implement call"
   end
 end
-

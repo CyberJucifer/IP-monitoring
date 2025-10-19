@@ -16,24 +16,22 @@ class PingService
   end
 
   def ping
-    begin
-      pinger = Net::Ping::ICMP.new(@ip_address.ip, nil, PING_TIMEOUT)
+    pinger = Net::Ping::ICMP.new(@ip_address.ip, nil, PING_TIMEOUT)
 
-      success = Timeout.timeout(PING_TIMEOUT) do
-        pinger.ping
-      end
-
-      if success && pinger.duration
-        rtt = pinger.duration * 1000
-        create_ping_result(rtt, true)
-      else
-        create_ping_result(nil, false)
-      end
-    rescue StandardError
-      create_ping_result(nil, false)
-    ensure
-      pinger&.close
+    success = Timeout.timeout(PING_TIMEOUT) do
+      pinger.ping
     end
+
+    if success && pinger.duration
+      rtt = pinger.duration * 1000
+      create_ping_result(rtt, true)
+    else
+      create_ping_result(nil, false)
+    end
+  rescue StandardError
+    create_ping_result(nil, false)
+  ensure
+    pinger&.close
   end
 
   private

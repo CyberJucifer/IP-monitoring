@@ -13,5 +13,3 @@ module TimeValidation
     end
   end
 end
-
-
